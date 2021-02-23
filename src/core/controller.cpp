@@ -92,13 +92,13 @@ Controller::Controller()
 
     // set global shortcuts for MacOS
     m_HotkeyScreenshotCapture =
-      new QHotkey(QKeySequence("Ctrl+Alt+Shift+4"), true, this);
+      new QHotkey(QKeySequence("Meta+P"), true, this);
     QObject::connect(m_HotkeyScreenshotCapture,
                      &QHotkey::activated,
                      qApp,
                      [&]() { this->startVisualCapture(); });
     m_HotkeyScreenshotHistory =
-      new QHotkey(QKeySequence("Ctrl+Alt+Shift+H"), true, this);
+      new QHotkey(QKeySequence("Meta+H"), true, this);
     QObject::connect(m_HotkeyScreenshotHistory,
                      &QHotkey::activated,
                      qApp,
