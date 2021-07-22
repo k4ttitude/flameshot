@@ -22,6 +22,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QClipboard>
+#include <QDebug>
 #include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QJsonDocument>
@@ -104,7 +105,10 @@ Controller::Controller()
                      qApp,
                      [&]() { this->showRecentScreenshots(); });
 #endif
-    getLatestAvailableVersion();
+
+    if (ConfigHandler().checkForUpdates()) {
+        getLatestAvailableVersion();
+    }
 }
 
 Controller::~Controller()
@@ -312,7 +316,7 @@ void Controller::startVisualCapture(const uint id,
         m_captureWindow->raise();
 #else
         m_captureWindow->showFullScreen();
-        // m_captureWindow->show(); //Debug
+//        m_captureWindow->show(); // For CaptureWidget Debugging under Linux
 #endif
         if (!m_appLatestUrl.isEmpty() &&
             ConfigHandler().ignoreUpdateToVersion().compare(
@@ -382,6 +386,7 @@ void Controller::openLauncherWindow()
 
 void Controller::enableTrayIcon()
 {
+    ConfigHandler().setDisabledTrayIcon(false);
     if (m_trayIcon) {
         m_trayIcon->show();
         return;
@@ -391,7 +396,6 @@ void Controller::enableTrayIcon()
         Q_ASSERT(m_trayIconMenu);
     }
 
-    ConfigHandler().setDisabledTrayIcon(false);
     QAction* captureAction = new QAction(tr("&Take Screenshot"), this);
     connect(captureAction, &QAction::triggered, this, [this]() {
 #if defined(Q_OS_MACOS)
@@ -495,20 +499,21 @@ void Controller::enableTrayIcon()
 #endif
 
     m_trayIcon->show();
+
     if (ConfigHandler().showStartupLaunchMessage()) {
         m_trayIcon->showMessage(
           "Flameshot",
           QObject::tr(
             "Hello, I'm here! Click icon in the tray to take a screenshot or "
             "click with a right button to see more options."),
-          QSystemTrayIcon::Information,
+          trayIcon,
           3000);
     }
 }
 
 void Controller::disableTrayIcon()
 {
-#if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
+#if defined(Q_OS_LINUX) || defined(Q_OS_UNIX) || defined(Q_OS_MACOS)
     if (m_trayIcon) {
         m_trayIcon->hide();
     }

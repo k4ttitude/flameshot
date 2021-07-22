@@ -11,6 +11,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QStandardPaths>
 #include <QTextCodec>
 #include <QVBoxLayout>
@@ -18,6 +19,7 @@
 GeneralConf::GeneralConf(QWidget* parent)
   : QWidget(parent)
   , m_historyConfirmationToDelete(nullptr)
+  , m_undoLimit(nullptr)
 {
     m_layout = new QVBoxLayout(this);
     m_layout->setAlignment(Qt::AlignTop);
@@ -33,6 +35,10 @@ GeneralConf::GeneralConf(QWidget* parent)
     initCopyPathAfterSave();
     initUseJpgForClipboard();
     initSaveAfterCopy();
+    initUploadHistoryMaxSize();
+    initUndoLimit();
+
+    m_layout->addStretch();
 
     // this has to be at the end
     initConfigButtons();
@@ -51,6 +57,8 @@ void GeneralConf::updateComponents()
     m_saveAfterCopy->setChecked(config.saveAfterCopyValue());
     m_copyPathAfterSave->setChecked(config.copyPathAfterSaveEnabled());
     m_useJpgForClipboard->setChecked(config.useJpgForClipboard());
+    m_uploadHistoryMaxSize->setValue(config.uploadHistoryMaxSizeValue());
+    m_undoLimit->setValue(config.undoLimit());
 
     if (!config.savePath().isEmpty()) {
         m_savePath->setText(config.savePath());
@@ -155,7 +163,32 @@ void GeneralConf::resetConfiguration()
         m_savePath->setText(
           QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
         ConfigHandler().setDefaultSettings();
+        setActualFormData();
     }
+}
+
+void GeneralConf::setActualFormData()
+{
+    // read and set current settings
+    ConfigHandler config;
+    m_sysNotifications->setChecked(config.desktopNotificationValue());
+    m_showTray->setChecked(!config.disabledTrayIconValue());
+    m_helpMessage->setChecked(config.showHelpValue());
+    m_sidePanelButton->setChecked(config.showSidePanelButtonValue());
+    m_checkForUpdates->setChecked(config.checkForUpdates());
+    m_autostart->setChecked(config.startupLaunchValue());
+    m_showStartupLaunchMessage->setChecked(config.showStartupLaunchMessage());
+    m_copyAndCloseAfterUpload->setChecked(
+      config.copyAndCloseAfterUploadEnabled());
+    m_copyPathAfterSave->setChecked(config.copyPathAfterSaveEnabled());
+    m_saveAfterCopy->setChecked(config.saveAfterCopyValue());
+    m_savePath->setText(config.savePath());
+    m_screenshotPathFixedCheck->setChecked(config.savePathFixed());
+    m_historyConfirmationToDelete->setChecked(
+      config.historyConfirmationToDelete());
+    m_uploadHistoryMaxSize->setValue(config.uploadHistoryMaxSizeValue());
+    m_undoLimit->setValue(config.undoLimit());
+    m_useJpgForClipboard->setChecked(config.useJpgForClipboard());
 }
 
 void GeneralConf::initShowHelp()
@@ -204,8 +237,7 @@ void GeneralConf::initShowTrayIcon()
 {
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
     m_showTray = new QCheckBox(tr("Show tray icon"), this);
-    ConfigHandler config;
-    bool checked = !config.disabledTrayIconValue();
+    bool checked = !ConfigHandler().disabledTrayIconValue();
     m_showTray->setChecked(checked);
     m_showTray->setToolTip(tr("Show the systemtray icon"));
     m_layout->addWidget(m_showTray);
@@ -237,7 +269,6 @@ void GeneralConf::initHistoryConfirmationToDelete()
 void GeneralConf::initConfigButtons()
 {
     QHBoxLayout* buttonLayout = new QHBoxLayout();
-    m_layout->addStretch();
     QGroupBox* box = new QGroupBox(tr("Configuration File"));
     box->setFlat(true);
     box->setLayout(buttonLayout);
@@ -281,8 +312,7 @@ void GeneralConf::initCheckForUpdates()
 void GeneralConf::initAutostart()
 {
     m_autostart = new QCheckBox(tr("Launch at startup"), this);
-    ConfigHandler config;
-    bool checked = config.startupLaunchValue();
+    bool checked = ConfigHandler().startupLaunchValue();
     m_autostart->setChecked(checked);
     m_autostart->setToolTip(tr("Launch Flameshot"));
     m_layout->addWidget(m_autostart);
@@ -335,7 +365,6 @@ void GeneralConf::initSaveAfterCopy()
     QGroupBox* box = new QGroupBox(tr("Save Path"));
     box->setFlat(true);
     m_layout->addWidget(box);
-    m_layout->addStretch();
 
     QVBoxLayout* vboxLayout = new QVBoxLayout();
     box->setLayout(vboxLayout);
@@ -349,7 +378,7 @@ void GeneralConf::initSaveAfterCopy()
     }
     m_savePath = new QLineEdit(path, this);
     m_savePath->setDisabled(true);
-    QString foreground = this->palette().foreground().color().name();
+    QString foreground = this->palette().windowText().color().name();
     m_savePath->setStyleSheet(QStringLiteral("color: %1").arg(foreground));
     pathLayout->addWidget(m_savePath);
 
@@ -377,6 +406,64 @@ void GeneralConf::historyConfirmationToDelete(bool checked)
     ConfigHandler().setHistoryConfirmationToDelete(checked);
 }
 
+void GeneralConf::initUploadHistoryMaxSize()
+{
+    QGroupBox* box = new QGroupBox(tr("Latest Uploads Max Size"));
+    box->setFlat(true);
+    m_layout->addWidget(box);
+
+    QVBoxLayout* vboxLayout = new QVBoxLayout();
+    box->setLayout(vboxLayout);
+
+    int max = ConfigHandler().uploadHistoryMaxSizeValue();
+
+    m_uploadHistoryMaxSize = new QSpinBox(this);
+    m_uploadHistoryMaxSize->setMaximum(50);
+    m_uploadHistoryMaxSize->setValue(max);
+    QString foreground = this->palette().windowText().color().name();
+    m_uploadHistoryMaxSize->setStyleSheet(
+      QStringLiteral("color: %1").arg(foreground));
+
+    connect(m_uploadHistoryMaxSize,
+            SIGNAL(valueChanged(int)),
+            this,
+            SLOT(uploadHistoryMaxSizeChanged(int)));
+    vboxLayout->addWidget(m_uploadHistoryMaxSize);
+}
+
+void GeneralConf::uploadHistoryMaxSizeChanged(int max)
+{
+    ConfigHandler().setUploadHistoryMaxSize(max);
+}
+
+void GeneralConf::initUndoLimit()
+{
+    QGroupBox* box = new QGroupBox(tr("Undo limit"));
+    box->setFlat(true);
+    m_layout->addWidget(box);
+
+    QVBoxLayout* vboxLayout = new QVBoxLayout();
+    box->setLayout(vboxLayout);
+
+    int limit = ConfigHandler().undoLimit();
+
+    m_undoLimit = new QSpinBox(this);
+    m_undoLimit->setMinimum(1);
+    m_undoLimit->setMaximum(999);
+    m_undoLimit->setValue(limit);
+    QString foreground = this->palette().windowText().color().name();
+    m_undoLimit->setStyleSheet(QStringLiteral("color: %1").arg(foreground));
+
+    connect(m_undoLimit, SIGNAL(valueChanged(int)), this, SLOT(undoLimit(int)));
+
+    vboxLayout->addWidget(m_undoLimit);
+}
+
+void GeneralConf::undoLimit(int limit)
+{
+    ConfigHandler().setUndoLimit(limit);
+}
+
 void GeneralConf::initUseJpgForClipboard()
 {
     m_useJpgForClipboard =
@@ -388,6 +475,10 @@ void GeneralConf::initUseJpgForClipboard()
       tr("Use JPG format for clipboard (PNG default)"));
     m_layout->addWidget(m_useJpgForClipboard);
 
+#if defined(Q_OS_MACOS)
+    // FIXME - temporary fix to disable option for MacOS
+    m_useJpgForClipboard->hide();
+#endif
     connect(m_useJpgForClipboard,
             &QCheckBox::clicked,
             this,

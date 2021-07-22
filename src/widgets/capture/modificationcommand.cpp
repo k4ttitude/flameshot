@@ -2,27 +2,24 @@
 // SPDX-FileCopyrightText: 2017-2019 Alejandro Sirgo Rica & Contributors
 
 #include "modificationcommand.h"
-#include <QPainter>
+#include "capturewidget.h"
 
-ModificationCommand::ModificationCommand(QPixmap* p, CaptureTool* t)
-  : m_pixmap(p)
-  , m_tool(t)
+ModificationCommand::ModificationCommand(
+  CaptureWidget* captureWidget,
+  const CaptureToolObjects& captureToolObjects,
+  const CaptureToolObjects& captureToolObjectsBackup)
+  : m_captureWidget(captureWidget)
 {
-    setText(t->name());
+    m_captureToolObjects = captureToolObjects;
+    m_captureToolObjectsBackup = captureToolObjectsBackup;
 }
 
 void ModificationCommand::undo()
 {
-    m_tool->undo(*m_pixmap);
+    m_captureWidget->setCaptureToolObjects(m_captureToolObjectsBackup);
 }
 
 void ModificationCommand::redo()
 {
-    QPainter p(m_pixmap);
-    p.setRenderHint(QPainter::Antialiasing);
-    m_tool->process(p, *m_pixmap, true);
-    if (m_tool->nameID() == ToolType::CIRCLECOUNT) {
-        emit this->m_tool->requestAction(
-          CaptureTool::Request::REQ_INCREMENT_CIRCLE_COUNT);
-    }
+    m_captureWidget->setCaptureToolObjects(m_captureToolObjects);
 }

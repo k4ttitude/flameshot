@@ -73,10 +73,14 @@ add_subdirectory(utils)
 add_subdirectory(widgets)
 add_subdirectory(tools)
 
+
+
+
 set(FLAMESHOT_TS_FILES
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_ca.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_cs.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_de_DE.ts
+        ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_el.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_es.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_eu.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_fr.ts
@@ -86,7 +90,9 @@ set(FLAMESHOT_TS_FILES
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_ka.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_ko.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_nl.ts
+        ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_nb_NO.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_nl_NL.ts
+        ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_nl.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_pl.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_pt_BR.ts
         ${CMAKE_SOURCE_DIR}/data/translations/Internationalization_ru.ts
@@ -107,7 +113,7 @@ endif ()
 
 target_sources(
         flameshot
-        PRIVATE # ${CMAKE_CURRENT_SOURCE_DIR}/../external/singleapplication/singleapplication.cpp
+        PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../external/Qt-Color-Widgets/src/color_utils.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../external/Qt-Color-Widgets/src/color_wheel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../external/Qt-Color-Widgets/include/color_wheel.hpp
@@ -117,41 +123,51 @@ target_sources(
         main.cpp)
 
 target_include_directories(
+  flameshot
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/Qt-Color-Widgets/include>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../dbus/>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cli>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/config>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/core>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/arrow>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/pixelate>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/circle>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/circlecount>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/copy>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/exit>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/imgur>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/launcher>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/line>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/marker>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/move>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/pencil>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/pin>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/rectangle>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/redo>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/save>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/selection>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/sizeindicator>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/text>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/undo>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/sizeincrease>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/sizedecrease>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/utils>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/widgets>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/widgets/panel>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/widgets/capture>
+         $<INSTALL_INTERFACE:include/mylib>)
+
+if (USE_EXTERNAL_SINGLEAPPLICATION)
+    add_compile_definitions(USE_EXTERNAL_SINGLEAPPLICATION=1)
+else ()
+    target_include_directories(
         flameshot
-        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/singleapplication/>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/Qt-Color-Widgets/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../dbus/>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cli>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/config>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/core>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/arrow>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/pixelate>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/circle>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/circlecount>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/copy>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/exit>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/imgur>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/launcher>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/line>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/marker>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/move>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/pencil>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/pin>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/rectangle>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/redo>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/save>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/selection>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/sizeindicator>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/text>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools/undo>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/utils>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/widgets>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/widgets/panel>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/widgets/capture>
-        $<INSTALL_INTERFACE:include/mylib>)
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/singleapplication>)
+endif()
 
 target_link_libraries(
         flameshot
@@ -161,7 +177,7 @@ target_link_libraries(
         Qt5::DBus
         Qt5::Network
         Qt5::Widgets
-        SingleApplication::SingleApplication
+        ${QTSINGLEAPPLICATION_LIBRARY}
         spdlog::spdlog
 )
 
@@ -189,6 +205,17 @@ if (WIN32)
     endif ()
 endif ()
 
+find_package (Git)
+if (GIT_FOUND)
+    message("git found: ${GIT_EXECUTABLE} in version     ${GIT_VERSION_STRING}")
+    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD OUTPUT_VARIABLE FLAMESHOT_GIT_HASH)
+    string(REGEX REPLACE "\r*\n$" "" FLAMESHOT_GIT_HASH "${FLAMESHOT_GIT_HASH}")
+    target_compile_definitions(flameshot PRIVATE FLAMESHOT_GIT_HASH="${FLAMESHOT_GIT_HASH}")
+    message("FLAMESHOT_GIT_HASH: ${FLAMESHOT_GIT_HASH}")
+else()
+    target_compile_definitions(flameshot PRIVATE FLAMESHOT_GIT_HASH="-")
+    message("git command is not found")
+endif ()
 target_compile_definitions(flameshot PRIVATE APP_PREFIX="${CMAKE_INSTALL_PREFIX}")
 target_compile_definitions(flameshot PRIVATE APP_VERSION="v${PROJECT_VERSION}")
 target_compile_definitions(flameshot PRIVATE IMGUR_CLIENT_ID="313baf0c7b4d3ff")
@@ -234,6 +261,10 @@ configure_file(${CMAKE_SOURCE_DIR}/data/dbus/org.flameshot.Flameshot.xml
 
 configure_file(${CMAKE_SOURCE_DIR}/data/dbus/org.flameshot.Flameshot.service.in
         ${CMAKE_CURRENT_BINARY_DIR}/share/dbus-1/services/org.flameshot.Flameshot.service)
+
+# Install man pages
+configure_file(${CMAKE_SOURCE_DIR}/data/man/man1/flameshot.1
+        ${CMAKE_CURRENT_BINARY_DIR}/share/man/man1/flameshot.1 COPYONLY)
 
 # Install Icons
 configure_file(${CMAKE_SOURCE_DIR}/data/img/hicolor/48x48/apps/org.flameshot.Flameshot.png
@@ -284,10 +315,14 @@ if (WIN32)
 
         install(DIRECTORY ${CMAKE_BINARY_DIR}/windeployqt_stuff/ DESTINATION bin)
 
+
+        STRING(REGEX REPLACE "\\\\" "/" OPENSSL_ROOT_DIR "$ENV{OPENSSL_ROOT_DIR}" )
+ 
         if (ENABLE_OPENSSL)
-            if (EXISTS $ENV{OPENSSL_ROOT_DIR}/bin)
-                install(
-                        DIRECTORY $ENV{OPENSSL_ROOT_DIR}/bin/
+            if (EXISTS ${OPENSSL_ROOT_DIR}/bin)
+
+             install(
+                        DIRECTORY ${OPENSSL_ROOT_DIR}/bin/
                         DESTINATION bin
                         FILES_MATCHING
                         PATTERN "*.dll")

@@ -78,7 +78,7 @@ void ColorPicker::paintEvent(QPaintEvent*)
         if (m_colorList.at(i).isValid()) {
             // draw preset color
             painter.setBrush(QColor(m_colorList.at(i)));
-            painter.drawRoundRect(rects.at(i), 100, 100);
+            painter.drawRoundedRect(rects.at(i), 100, 100);
         } else {
             // draw rainbow (part) for custom color
             QRect lastRect = rects.at(i);
@@ -95,7 +95,7 @@ void ColorPicker::paintEvent(QPaintEvent*)
                 // set color and draw circle
                 painter.setPen(color);
                 painter.setBrush(color);
-                painter.drawRoundRect(lastRect, 100, 100);
+                painter.drawRoundedRect(lastRect, 100, 100);
 
                 // set next color, circle geometry
                 h += fHStep;
@@ -112,7 +112,8 @@ void ColorPicker::mouseMoveEvent(QMouseEvent* e)
 {
     for (int i = 0; i < m_colorList.size(); ++i) {
         if (m_colorAreaList.at(i).contains(e->pos())) {
-            emit colorSelected(m_colorList.at(i));
+            m_drawColor = m_colorList.at(i);
+            emit colorSelected(m_drawColor);
             update();
             break;
         }

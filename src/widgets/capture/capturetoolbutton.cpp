@@ -7,7 +7,6 @@
 #include "src/utils/colorutils.h"
 #include "src/utils/confighandler.h"
 #include "src/utils/globalvalues.h"
-#include "src/widgets/capture/capturewidget.h"
 #include <QApplication>
 #include <QIcon>
 #include <QMouseEvent>
@@ -20,6 +19,8 @@
 CaptureToolButton::CaptureToolButton(const ButtonType t, QWidget* parent)
   : CaptureButton(parent)
   , m_buttonType(t)
+  , m_tool(nullptr)
+  , m_emergeAnimation(nullptr)
 {
     initButton();
     if (t == TYPE_SELECTIONINDICATOR) {
@@ -30,8 +31,24 @@ CaptureToolButton::CaptureToolButton(const ButtonType t, QWidget* parent)
     }
 }
 
+CaptureToolButton::~CaptureToolButton()
+{
+    if (m_tool) {
+        delete m_tool;
+        m_tool = nullptr;
+    }
+    if (m_emergeAnimation) {
+        delete m_emergeAnimation;
+        m_emergeAnimation = nullptr;
+    }
+}
+
 void CaptureToolButton::initButton()
 {
+    if (m_tool) {
+        delete m_tool;
+        m_tool = nullptr;
+    }
     m_tool = ToolFactory().CreateTool(m_buttonType, this);
 
     resize(GlobalValues::buttonBaseSize(), GlobalValues::buttonBaseSize());
@@ -126,6 +143,9 @@ static std::map<CaptureToolButton::ButtonType, int> buttonTypeOrder
 #else
       { CaptureToolButton::TYPE_EXIT, 17 }, { CaptureToolButton::TYPE_PIN, 18 },
 #endif
+
+      { CaptureToolButton::TYPE_SIZEINCREASE, 20 },
+      { CaptureToolButton::TYPE_SIZEDECREASE, 21 },
 };
 
 int CaptureToolButton::getPriorityByButton(CaptureToolButton::ButtonType b)
@@ -159,4 +179,6 @@ QVector<CaptureToolButton::ButtonType>
 #endif
       CaptureToolButton::TYPE_PIN,
       CaptureToolButton::TYPE_CIRCLECOUNT,
+      CaptureToolButton::TYPE_SIZEINCREASE,
+      CaptureToolButton::TYPE_SIZEDECREASE,
   };

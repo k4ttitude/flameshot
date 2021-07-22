@@ -28,7 +28,10 @@
     <a href="https://github.com/flameshot-org/flameshot/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/flameshot-org/flameshot.svg?style=flat-square" alt="License" />
     </a>
-    <a href="https://flameshot.org">
+  <a href="https://hosted.weblate.org/engage/flameshot/">
+    <img src="https://hosted.weblate.org/widgets/flameshot/-/flameshot/svg-badge.svg" alt="Translation status" />
+  </a>
+  <a href="https://flameshot.org">
       <img src="https://img.shields.io/github/release/flameshot-org/flameshot.svg?style=flat-square&label=docs" alt="Docs" />
     </a>
     <br>
@@ -57,7 +60,8 @@
   - [Local](#local)
   - [Global](#global)
     - [On KDE Plasma desktop](#on-kde-plasma-desktop)
-    - [On Ubuntu](#on-ubuntu-tested-on-1804)
+    - [On Ubuntu](#on-ubuntu-tested-on-1804-2004)
+    - [On XFCE 4](#on-xfce-4)
 - [Considerations](#considerations)
 - [Installation](#installation)
   - [Prebuilt Packages](#prebuilt-packages)
@@ -82,7 +86,7 @@
 
 - Customizable appearance.
 - Easy to use.
-- In-app screenshot edition.
+- In-app screenshot editing.
 - DBus interface.
 - Upload to Imgur.
 
@@ -241,9 +245,9 @@ Steps for using the configuration:
 4. If there's one, you'll need to disable an entry for Spectacle, the default KDE screenshot utility first because its shortcuts might collide with Flameshot's ones; so, just uncheck the _Spectacle_ entry.
 5. Click _Edit_ → _Import..._, navigate to the Desktop folder (or wherever you saved the configuration file) and open the configuration file.
 6. Now the Flameshot entry should appear in the list. Click _Apply_ to apply the changes.
-7. If you want to change the defaults, you can expand the entry, select the appropriate action and modify it as you wish; the process is pretty mush self-explanatory.
+7. If you want to change the defaults, you can expand the entry, select the appropriate action and modify it as you wish; the process is pretty self-explanatory.
 
-#### On Ubuntu (Tested on 18.04)
+#### On Ubuntu (Tested on 18.04, 20.04)
 
 To use Flameshot instead of the default screenshot application in Ubuntu we need to remove the binding on <kbd>Prt Sc</kbd> key, and then create a new binding for `/usr/bin/flameshot gui` ([adaptated](https://askubuntu.com/posts/1039949/revisions) from [Pavel's answer on AskUbuntu](https://askubuntu.com/revisions/1036473/1)). 
 
@@ -253,7 +257,8 @@ To use Flameshot instead of the default screenshot application in Ubuntu we need
   gsettings set org.gnome.settings-daemon.plugins.media-keys screenshot '[]'
   ```
 
-2. Go to Settings > Device > Keyboard and press the '+' button at the bottom.
+2. Ubuntu 18.04: Go to Settings > Device > Keyboard and press the '+' button at the bottom.
+   Ubuntu 20.04: Go to Settings > Keyboard and press the '+' button at the bottom.
 
 3. Name the command as you like it, e.g. `flameshot`. And in the command insert `/usr/bin/flameshot gui`.
 
@@ -261,11 +266,27 @@ To use Flameshot instead of the default screenshot application in Ubuntu we need
 
 Now every time you press <kbd>Prt Sc</kbd>, it will start the Flameshot GUI instead of the default application.
 
+
+#### On XFCE 4
+
+1. Go to `Keyboard` settings
+2. Switch to the tab `Application Shortcuts`
+3. Find the entry
+        
+    ```text
+    Command                        Shortcut
+    xfce4-screenshooter -fd 1      Print
+    ````
+4. Replace `xfce4-screenshooter -fd 1` with `flameshot gui`
+
+Now every time you press <kbd>Prt Sc</kbd> it will start Flameshot GUI instead of the default application.
+
+
 ## Considerations
 
 - Experimental Gnome Wayland and Plasma Wayland support.
 
-- If you are using Gnome you need to install the [Gnome Shell Extension Appindicator](https://github.com/Ubuntu/gnome-shell-extension-appindicator) extension in order to see the system tray icon.
+- If you are using Gnome you need to install the [AppIndicator and KStatusNotifierItem Support](https://extensions.gnome.org/extension/615/appindicator-support/) extension in order to see the system tray icon.
 
 - Press <kbd>Enter</kbd> or <kbd>Ctrl</kbd> + <kbd>C</kbd> when you are in a capture mode and you don't have an active selection and the whole desktop will be copied to your clipboard. Pressing <kbd>Ctrl</kbd> + <kbd>S</kbd> will save your capture to a file. Check the [Shortcuts](#keyboard-shortcuts) for more information.
 
@@ -279,9 +300,7 @@ Now every time you press <kbd>Prt Sc</kbd>, it will start the Flameshot GUI inst
 
 ## Installation
 
-Flameshot can be installed on Linux and Microsoft Windows currently.
-
-There is no macOS port of Flameshot currently that can be easily installed. But you can build Flameshot yourself and use it. Please participate in the development of Flameshot and help us make a macOS version.
+Flameshot can be installed on Linux, Microsoft Windows, and macOS.
 
 ### Prebuilt packages
 
@@ -296,12 +315,18 @@ There are packages available in the repository of some Linux distributions:
 - [Debian 10+](https://tracker.debian.org/pkg/flameshot): `apt install flameshot`
   + Package for Debian 9 ("Stretch") also [available via stretch-backports](https://backports.debian.org/).
 - [Ubuntu 18.04+](https://launchpad.net/ubuntu/+source/flameshot): `apt install flameshot`
-- [openSUSE](https://software.opensuse.org/package/flameshot)
-- [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/flameshot) (`xbps-install flameshot`)
+- [openSUSE](https://software.opensuse.org/package/flameshot): `zypper install flameshot`
+- [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/flameshot): `xbps-install flameshot`
 - [Solus](https://dev.getsol.us/source/flameshot/): `eopkg it flameshot`
-- Fedora: `dnf install flameshot`
+- [Fedora](https://src.fedoraproject.org/rpms/flameshot): `dnf install flameshot`
+- [NixOS](https://search.nixos.org/packages?query=flameshot): `nix-env -iA nixos.flameshot`
 - [Snap/Flatpak/AppImage](https://github.com/flameshotapp/packages)
 - [Docker](https://github.com/ManuelLR/docker-flameshot)
+
+There are also options for installing on macOS:
+
+- [MacPorts](https://www.macports.org): `sudo port selfupdate && sudo port install flameshot`
+- [Homebrew](https://brew.sh): `brew install --cask flameshot`
 
 <details>
   <summary>Expand this section to see what distros are using an up to date version of flameshot</summary>
@@ -423,6 +448,9 @@ When `make` command completed you can launch flameshot from `project_folder/buil
 Simply use `make install` with privileges. 
 Note: If you install from source, there is no uninstaller, you will need to manually remove the files. Consider using [CMAKE_INSTALL_PREFIX](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html) to install to a custom location for easy removal. 
 
+### FAQ
+https://flameshot.org/faq/
+
 ## License
 - The main code is licensed under [GPLv3](LICENSE)
 - The logo of Flameshot is licensed under [Free Art License v1.3](img/app/flameshotLogoLicense.txt)
@@ -455,5 +483,6 @@ Thanks to those who have shown interest in the early development process:
 - ismatori
 
 Thanks to sponsors:
+- Namecheap
 - JetBrains
 - SignPath

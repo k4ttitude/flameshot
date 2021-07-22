@@ -3,6 +3,7 @@
 
 #include "filenamehandler.h"
 #include "src/utils/confighandler.h"
+#include "src/utils/strfparse.h"
 #include <QDir>
 #include <QStandardPaths>
 #include <ctime>
@@ -33,20 +34,17 @@ QString FileNameHandler::parsedPattern()
 QString FileNameHandler::parseFilename(const QString& name)
 {
     QString res = name;
-    // remove trailing characters '%' in the pattern
     if (name.isEmpty()) {
-        res = QLatin1String("%F_%H-%M");
+        res = ConfigHandler().filenamePatternDefault();
     }
+
+    // remove trailing characters '%' in the pattern
     while (res.endsWith('%')) {
         res.chop(1);
     }
-    std::time_t t = std::time(NULL);
 
-    char* tempData = QStringTocharArr(res);
-    char data[MAX_CHARACTERS] = { 0 };
-    std::strftime(data, sizeof(data), tempData, std::localtime(&t));
-    res = QString::fromLocal8Bit(data, (int)strlen(data));
-    free(tempData);
+    res =
+      QString::fromStdString(strfparse::format_time_string(name.toStdString()));
 
     // add the parsed pattern in a correct format for the filesystem
     res = res.replace(QLatin1String("/"), QStringLiteral("⁄"))
@@ -92,7 +90,7 @@ QString FileNameHandler::charArrToQString(const char* c)
     return QString::fromLocal8Bit(c, MAX_CHARACTERS);
 }
 
-char* FileNameHandler::QStringTocharArr(const QString& s)
+char* FileNameHandler::QStringToCharArr(const QString& s)
 {
     QByteArray ba = s.toLocal8Bit();
     return const_cast<char*>(strdup(ba.constData()));

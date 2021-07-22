@@ -186,6 +186,20 @@ void ConfigHandler::setDrawColor(const QColor& c)
     m_settings.setValue(QStringLiteral("drawColor"), c.name());
 }
 
+void ConfigHandler::setFontFamily(const QString& fontFamily)
+{
+    m_settings.setValue(QStringLiteral("fontFamily"), fontFamily);
+}
+
+const QString& ConfigHandler::fontFamily()
+{
+    m_strRes.clear();
+    if (m_settings.contains(QStringLiteral("fontFamily"))) {
+        m_strRes = m_settings.value(QStringLiteral("fontFamily")).toString();
+    }
+    return m_strRes;
+}
+
 bool ConfigHandler::showHelpValue()
 {
     bool res = true;
@@ -222,6 +236,21 @@ QString ConfigHandler::ignoreUpdateToVersion()
     return m_settings.value(QStringLiteral("ignoreUpdateToVersion")).toString();
 }
 
+void ConfigHandler::setUndoLimit(int value)
+{
+    m_settings.setValue(QStringLiteral("undoLimit"), value);
+}
+
+int ConfigHandler::undoLimit()
+{
+    int limit = 100;
+    if (m_settings.contains(QStringLiteral("undoLimit"))) {
+        limit = m_settings.value(QStringLiteral("undoLimit")).toInt();
+        limit = qBound(1, limit, 999);
+    }
+    return limit;
+}
+
 bool ConfigHandler::desktopNotificationValue()
 {
     bool res = true;
@@ -238,9 +267,19 @@ void ConfigHandler::setDesktopNotification(const bool showDesktopNotification)
                         showDesktopNotification);
 }
 
+QString ConfigHandler::filenamePatternDefault()
+{
+    m_strRes = QLatin1String("%F_%H-%M");
+    return m_strRes;
+}
+
 QString ConfigHandler::filenamePatternValue()
 {
-    return m_settings.value(QStringLiteral("filenamePattern")).toString();
+    m_strRes = m_settings.value(QStringLiteral("filenamePattern")).toString();
+    if (m_strRes.isEmpty()) {
+        m_strRes = filenamePatternDefault();
+    }
+    return m_strRes;
 }
 
 void ConfigHandler::setFilenamePattern(const QString& pattern)
@@ -264,7 +303,7 @@ void ConfigHandler::setDisabledTrayIcon(const bool disabledTrayIcon)
 
 int ConfigHandler::drawThicknessValue()
 {
-    int res = 0;
+    int res = 3;
     if (m_settings.contains(QStringLiteral("drawThickness"))) {
         res = m_settings.value(QStringLiteral("drawThickness")).toInt();
     }
@@ -274,6 +313,20 @@ int ConfigHandler::drawThicknessValue()
 void ConfigHandler::setDrawThickness(const int thickness)
 {
     m_settings.setValue(QStringLiteral("drawThickness"), thickness);
+}
+
+int ConfigHandler::drawFontSizeValue()
+{
+    int res = 8;
+    if (m_settings.contains(QStringLiteral("drawFontSize"))) {
+        res = m_settings.value(QStringLiteral("drawFontSize")).toInt();
+    }
+    return res;
+}
+
+void ConfigHandler::setDrawFontSize(const int fontSize)
+{
+    m_settings.setValue(QStringLiteral("drawFontSize"), fontSize);
 }
 
 bool ConfigHandler::keepOpenAppLauncherValue()
@@ -318,31 +371,29 @@ bool ConfigHandler::startupLaunchValue()
 
 bool ConfigHandler::verifyLaunchFile()
 {
-    bool res = false;
-
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
     QString path = QStandardPaths::locate(QStandardPaths::GenericConfigLocation,
                                           "autostart/",
                                           QStandardPaths::LocateDirectory) +
                    "Flameshot.desktop";
-    res = QFile(path).exists();
+    bool res = QFile(path).exists();
 #elif defined(Q_OS_WIN)
     QSettings bootUpSettings(
       "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
       QSettings::NativeFormat);
-    res = bootUpSettings.value("Flameshot").toString() ==
-          QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+    bool res =
+      bootUpSettings.value("Flameshot").toString() ==
+      QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
 #endif
     return res;
 }
 
 void ConfigHandler::setStartupLaunch(const bool start)
 {
-
-    m_settings.setValue(QStringLiteral("startupLaunch"), start);
     if (start == m_settings.value(QStringLiteral("startupLaunch")).toBool()) {
         return;
     }
+    m_settings.setValue(QStringLiteral("startupLaunch"), start);
 #if defined(Q_OS_MACOS)
     /* TODO - there should be more correct way via API, but didn't find it
      without extra dependencies, there should be something like that:
@@ -482,6 +533,20 @@ void ConfigHandler::setHistoryConfirmationToDelete(const bool check)
     m_settings.setValue(QStringLiteral("historyConfirmationToDelete"), check);
 }
 
+int ConfigHandler::uploadHistoryMaxSizeValue()
+{
+    int max = 25;
+    if (m_settings.contains(QStringLiteral("uploadHistoryMax"))) {
+        max = m_settings.value(QStringLiteral("uploadHistoryMax")).toInt();
+    }
+    return max;
+}
+
+void ConfigHandler::setUploadHistoryMaxSize(const int max)
+{
+    m_settings.setValue(QStringLiteral("uploadHistoryMax"), max);
+}
+
 bool ConfigHandler::saveAfterCopyValue()
 {
     return m_settings.value(QStringLiteral("saveAfterCopy")).toBool();
@@ -508,15 +573,30 @@ void ConfigHandler::setCopyPathAfterSaveEnabled(const bool value)
 
 bool ConfigHandler::useJpgForClipboard() const
 {
+#if not defined(Q_OS_MACOS)
+    // FIXME - temporary fix to disable option for MacOS
     if (m_settings.contains(QStringLiteral("useJpgForClipboard"))) {
         return m_settings.value(QStringLiteral("useJpgForClipboard")).toBool();
     }
+#endif
     return false;
 }
 
 void ConfigHandler::setUseJpgForClipboard(const bool value)
 {
     m_settings.setValue(QStringLiteral("useJpgForClipboard"), value);
+}
+
+void ConfigHandler::setSaveAsFileExtension(const QString& extension)
+{
+    m_settings.setValue(QStringLiteral("setSaveAsFileExtension"), extension);
+}
+
+QString ConfigHandler::getSaveAsFileExtension()
+{
+    return m_settings
+      .value(QStringLiteral("setSaveAsFileExtension"), QString(".png"))
+      .toString();
 }
 
 void ConfigHandler::setDefaultSettings()
@@ -620,8 +700,15 @@ bool ConfigHandler::setShortcut(const QString& shortcutName,
     m_settings.beginGroup("Shortcuts");
 
     QVector<QKeySequence> reservedShortcuts;
+
+#if defined(Q_OS_MACOS)
+    reservedShortcuts << QKeySequence(Qt::CTRL + Qt::Key_Backspace)
+                      << QKeySequence(Qt::Key_Escape);
+#else
     reservedShortcuts << QKeySequence(Qt::Key_Backspace)
                       << QKeySequence(Qt::Key_Escape);
+#endif
+
     if (shortutValue.isEmpty()) {
         m_settings.setValue(shortcutName, "");
     } else if (reservedShortcuts.contains(QKeySequence(shortutValue))) {

@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include <QString>
+
 class QPixmap;
-class QString;
+class QWidget;
 
 class ScreenshotSaver
 {
@@ -13,6 +15,7 @@ public:
     ScreenshotSaver(const unsigned id);
 
     void saveToClipboard(const QPixmap& capture);
+    void saveToClipboardMime(const QPixmap& capture, const QString& imageType);
     bool saveToFilesystem(const QPixmap& capture,
                           const QString& path,
                           const QString& messagePrefix);
@@ -20,4 +23,14 @@ public:
 
 private:
     unsigned m_id;
+    QString ShowSaveFileDialog(QWidget* parent,
+                               const QString& title,
+                               const QString& directory,
+                               const QString& filter);
+
+    const QString pngFilter = "Portable Network Graphic file (PNG) (*.png)";
+    const QString bmpFilter = "BMP file (*.bmp)";
+    const QString jpgFilter = "JPEG file (*.jpg)";
+    const QString defaultFilter = "By extension [default: *.png] (*.png)";
+    const QString separator = ";;";
 };

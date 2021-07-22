@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 # cmake_policy(SET CMP0076 OLD)
 
-set(FLAMESHOT_VERSION 0.9.0)
+set(FLAMESHOT_VERSION 0.10.0)
 
 # Flameshot-org
 set(GIT_API_URL "https://api.github.com/repos/flameshot-org/flameshot/releases/latest")
@@ -9,7 +9,7 @@ set(GIT_API_URL "https://api.github.com/repos/flameshot-org/flameshot/releases/l
 # set(GIT_API_URL "https://api.github.com/repos/namecheap/flameshot/releases/latest")
 
 # TODO - fix it for all linux distros
-# find_package (Git)
+#find_package (Git)
 #if (GIT_FOUND)
 #  message("git found: ${GIT_EXECUTABLE} in version     ${GIT_VERSION_STRING}")
 #
@@ -86,7 +86,17 @@ enable_sanitizers(project_options)
 set(QAPPLICATION_CLASS
         QApplication
         CACHE STRING "Inheritance class for SingleApplication")
-add_subdirectory(external/singleapplication)
+
+if(USE_EXTERNAL_SINGLEAPPLICATION)
+  # look for external QtSingleApplication
+  # package dev-qt/qtsingleapplication provides no symlink to current version
+  set(qtsingleapplication_libs libQt5Solutions_SingleApplication-2.6 Qt5Solutions_SingleApplication-2.6)
+  find_library(QTSINGLEAPPLICATION_LIBRARY NAMES ${qtsingleapplication_libs})
+  message(STATUS "Using external SingleApplication library")
+else()
+  add_subdirectory(external/singleapplication)
+  set(QTSINGLEAPPLICATION_LIBRARY SingleApplication::SingleApplication)
+endif()
 
 if(USE_EXTERNAL_SPDLOG)
   find_package(spdlog REQUIRED)

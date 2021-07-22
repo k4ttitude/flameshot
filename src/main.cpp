@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2017-2019 Alejandro Sirgo Rica & Contributors
 
+#ifndef USE_EXTERNAL_SINGLEAPPLICATION
 #include "singleapplication.h"
+#else
+#include "QtSolutions/qtsingleapplication.h"
+#endif
+
 #include "src/cli/commandlineparser.h"
 #include "src/config/styleoverride.h"
 #include "src/core/capturerequest.h"
@@ -25,6 +30,7 @@
 #include "src/utils/dbusutils.h"
 #include <QDBusConnection>
 #include <QDBusMessage>
+#include <desktopinfo.h>
 #endif
 
 int waitAfterConnecting(int delay, QCoreApplication& app)
@@ -37,18 +43,17 @@ int waitAfterConnecting(int delay, QCoreApplication& app)
     return app.exec();
 }
 
+#ifdef Q_OS_LINUX
 // source: https://github.com/ksnip/ksnip/issues/416
 void wayland_hacks()
 {
     // Workaround to https://github.com/ksnip/ksnip/issues/416
-    QByteArray currentDesktop = qgetenv("XDG_CURRENT_DESKTOP").toLower();
-    QByteArray sessionDesktop = qgetenv("XDG_SESSION_DESKTOP").toLower();
-    QByteArray sessionType = qgetenv("XDG_SESSION_TYPE").toLower();
-    if (sessionType.contains("wayland") && (currentDesktop.contains("gnome") ||
-                                            sessionDesktop.contains("gnome"))) {
+    DesktopInfo info;
+    if (info.windowManager() == DesktopInfo::GNOME) {
         qputenv("QT_QPA_PLATFORM", "xcb");
     }
 }
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -65,7 +70,11 @@ int main(int argc, char* argv[])
 
     // no arguments, just launch Flameshot
     if (argc == 1) {
+#ifndef USE_EXTERNAL_SINGLEAPPLICATION
         SingleApplication app(argc, argv);
+#else
+        QtSingleApplication app(argc, argv);
+#endif
         QApplication::setStyle(new StyleOverride);
 
         QTranslator translator, qtTranslator;
